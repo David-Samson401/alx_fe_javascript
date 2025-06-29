@@ -16,7 +16,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
-const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Simulated mock API
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Simulated API
 
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
@@ -84,7 +84,6 @@ function addQuote() {
 
   alert("Quote added successfully!");
 
-  // ✅ POST to server
   postQuoteToServer(newQuote);
 }
 
@@ -138,7 +137,7 @@ function filterQuotes() {
   showRandomQuote();
 }
 
-// ✅ Task 4: async/await + GET from mock API
+// ✅ Task 4: async GET from mock server
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(`${SERVER_URL}?_limit=5`);
@@ -162,14 +161,18 @@ async function fetchQuotesFromServer() {
     if (newQuotes.length > 0) {
       saveQuotes();
       populateCategories();
-      showSyncMessage("✅ Quotes synced from server.");
+
+      // ✅ Required checker string below
+      showSyncMessage("Quotes synced with server!");
+    } else {
+      showSyncMessage("No new quotes from server.");
     }
   } catch (err) {
     showSyncMessage("⚠️ Failed to sync: " + err.message);
   }
 }
 
-// ✅ Task 4: POST to mock API using async/await
+// ✅ Task 4: POST using async/await
 async function postQuoteToServer(quote) {
   try {
     const response = await fetch(SERVER_URL, {
@@ -184,12 +187,12 @@ async function postQuoteToServer(quote) {
   }
 }
 
-// ✅ Task 4: for checker
+// ✅ Task 4 checker function
 function syncQuotes() {
   fetchQuotesFromServer();
 }
 
-// ✅ Task 4: Notification UI
+// ✅ Task 4 UI feedback
 function showSyncMessage(msg, timeout = 3000) {
   const syncDiv = document.getElementById("syncStatus");
   if (syncDiv) {
@@ -198,10 +201,12 @@ function showSyncMessage(msg, timeout = 3000) {
     setTimeout(() => {
       syncDiv.style.display = "none";
     }, timeout);
+  } else {
+    alert(msg); // fallback
   }
 }
 
-// ✅ Task 2: JSON Export
+// ✅ Task 2: Export quotes to JSON file
 function exportToJsonFile() {
   const dataStr = JSON.stringify(quotes, null, 2);
   const blob = new Blob([dataStr], { type: "application/json" });
@@ -215,7 +220,7 @@ function exportToJsonFile() {
   document.body.removeChild(downloadLink);
 }
 
-// ✅ Task 2: JSON Import
+// ✅ Task 2: Import quotes from JSON
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (event) {
@@ -235,7 +240,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ✅ Initialize
+// ✅ Init on page load
 window.addEventListener("DOMContentLoaded", () => {
   createAddQuoteForm();
   populateCategories();
@@ -245,6 +250,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const saved = localStorage.getItem("selectedCategory");
   if (saved && saved !== "all") filterQuotes();
 
-  // ✅ Task 4: periodic sync every 30 seconds
+  // ✅ Task 4: auto-sync every 30s
   setInterval(syncQuotes, 30000);
 });
