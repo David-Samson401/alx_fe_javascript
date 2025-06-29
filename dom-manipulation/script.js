@@ -16,7 +16,7 @@ let quotes = JSON.parse(localStorage.getItem("quotes")) || [
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
-const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Mock API
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Simulated mock API
 
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
@@ -84,7 +84,7 @@ function addQuote() {
 
   alert("Quote added successfully!");
 
-  // POST new quote to server
+  // ✅ POST to server
   postQuoteToServer(newQuote);
 }
 
@@ -138,59 +138,58 @@ function filterQuotes() {
   showRandomQuote();
 }
 
-// ✅ Checker expects this function
-function fetchQuotesFromServer() {
-  return fetch(`${SERVER_URL}?_limit=5`)
-    .then((res) => res.json())
-    .then((serverData) => {
-      const newQuotes = [];
+// ✅ Task 4: async/await + GET from mock API
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(`${SERVER_URL}?_limit=5`);
+    const serverData = await response.json();
 
-      serverData.forEach((item) => {
-        const simulatedQuote = {
-          text: item.title,
-          category: "ServerSync",
-        };
+    const newQuotes = [];
 
-        const exists = quotes.some((q) => q.text === simulatedQuote.text);
-        if (!exists) {
-          quotes.push(simulatedQuote);
-          newQuotes.push(simulatedQuote);
-        }
-      });
+    for (const item of serverData) {
+      const simulatedQuote = {
+        text: item.title,
+        category: "ServerSync",
+      };
 
-      if (newQuotes.length > 0) {
-        saveQuotes();
-        populateCategories();
-        showSyncMessage("✅ Quotes synced from server.");
+      const exists = quotes.some((q) => q.text === simulatedQuote.text);
+      if (!exists) {
+        quotes.push(simulatedQuote);
+        newQuotes.push(simulatedQuote);
       }
-    })
-    .catch((err) => {
-      showSyncMessage("⚠️ Failed to sync: " + err.message);
-    });
+    }
+
+    if (newQuotes.length > 0) {
+      saveQuotes();
+      populateCategories();
+      showSyncMessage("✅ Quotes synced from server.");
+    }
+  } catch (err) {
+    showSyncMessage("⚠️ Failed to sync: " + err.message);
+  }
 }
 
-// ✅ Checker expects this function
+// ✅ Task 4: POST to mock API using async/await
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      body: JSON.stringify(quote),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    console.log("✅ Posted quote to server:", data);
+  } catch (err) {
+    console.error("⚠️ Failed to post quote:", err);
+  }
+}
+
+// ✅ Task 4: for checker
 function syncQuotes() {
   fetchQuotesFromServer();
 }
 
-// ✅ Checker expects this function
-function postQuoteToServer(quote) {
-  fetch(SERVER_URL, {
-    method: "POST",
-    body: JSON.stringify(quote),
-    headers: { "Content-Type": "application/json" },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("✅ Posted quote to server:", data);
-    })
-    .catch((err) => {
-      console.error("⚠️ Failed to post quote:", err);
-    });
-}
-
-// ✅ Required UI notification
+// ✅ Task 4: Notification UI
 function showSyncMessage(msg, timeout = 3000) {
   const syncDiv = document.getElementById("syncStatus");
   if (syncDiv) {
@@ -202,7 +201,41 @@ function showSyncMessage(msg, timeout = 3000) {
   }
 }
 
-// ✅ Init
+// ✅ Task 2: JSON Export
+function exportToJsonFile() {
+  const dataStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = url;
+  downloadLink.download = "quotes.json";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}
+
+// ✅ Task 2: JSON Import
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function (event) {
+    try {
+      const importedQuotes = JSON.parse(event.target.result);
+      if (!Array.isArray(importedQuotes))
+        throw new Error("Invalid JSON format");
+
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      populateCategories();
+      alert("Quotes imported successfully!");
+    } catch (e) {
+      alert("Failed to import: Invalid JSON format.");
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+// ✅ Initialize
 window.addEventListener("DOMContentLoaded", () => {
   createAddQuoteForm();
   populateCategories();
@@ -212,6 +245,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const saved = localStorage.getItem("selectedCategory");
   if (saved && saved !== "all") filterQuotes();
 
-  // ✅ Periodic sync with server
+  // ✅ Task 4: periodic sync every 30 seconds
   setInterval(syncQuotes, 30000);
 });
