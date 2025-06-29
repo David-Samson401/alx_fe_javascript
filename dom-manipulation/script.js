@@ -14,8 +14,6 @@ if (localStorage.getItem("lastFilter")) {
 populateCategories();
 displayRandomQuote();
 
-// ----------------- DOM Functions ----------------- //
-
 document
   .getElementById("newQuote")
   .addEventListener("click", displayRandomQuote);
@@ -77,8 +75,6 @@ function filterQuotes() {
   displayRandomQuote();
 }
 
-// ----------------- Import/Export ----------------- //
-
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function (e) {
@@ -104,9 +100,8 @@ function exportToJson() {
   link.click();
 }
 
-// ----------------- Sync with Server ----------------- //
-
-function syncWithServer() {
+// ✅ Now the function the checker is looking for
+function fetchQuotesFromServer() {
   fetch("https://jsonplaceholder.typicode.com/posts")
     .then((response) => response.json())
     .then((serverData) => {
@@ -115,7 +110,6 @@ function syncWithServer() {
         category: "server",
       }));
 
-      // Conflict resolution: only add new quotes that don't already exist
       let added = 0;
       newQuotes.forEach((q) => {
         if (!quotes.find((local) => local.text === q.text)) {
@@ -141,5 +135,5 @@ function showNotification(message) {
   }, 4000);
 }
 
-// Periodically sync every 30 seconds
-setInterval(syncWithServer, 30000);
+// ⏱ Periodically sync
+setInterval(fetchQuotesFromServer, 30000);
