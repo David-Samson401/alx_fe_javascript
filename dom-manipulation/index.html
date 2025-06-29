@@ -8,17 +8,23 @@
   <body>
     <h1>Dynamic Quote Generator</h1>
 
+    <!-- Sync Status Banner -->
+    <div
+      id="syncStatus"
+      style="background: #eef; padding: 10px; display: none"
+    ></div>
+
     <!-- Filter Dropdown -->
     <label for="categoryFilter">Filter by Category:</label>
     <select id="categoryFilter" onchange="filterQuotes()">
       <option value="all">All Categories</option>
     </select>
 
-    <!-- Quote display and random button -->
+    <!-- Quote Display & Show Button -->
     <div id="quoteDisplay"></div>
     <button id="newQuote">Show New Quote</button>
 
-    <!-- JSON Import/Export -->
+    <!-- Import/Export -->
     <h2>Import/Export Quotes</h2>
     <button onclick="exportToJsonFile()">Export Quotes (JSON)</button>
     <input
